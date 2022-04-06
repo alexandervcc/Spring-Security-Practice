@@ -1,8 +1,10 @@
 package sf.sec.brewery.web.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.transaction.annotation.Transactional;
 import sf.sec.brewery.bootstrap.DefaultBreweryLoader;
 import sf.sec.brewery.domain.Beer;
+import sf.sec.brewery.domain.BeerOrder;
 import sf.sec.brewery.domain.Customer;
 import sf.sec.brewery.repositories.BeerOrderRepository;
 import sf.sec.brewery.repositories.BeerRepository;
@@ -139,28 +141,43 @@ public class BeerOrderControllerTest extends BaseIT{
                 .andExpect(status().isUnauthorized());
     }
 
-    @Disabled
+    @Transactional
     @Test
-    void pickUpOrderNotAuth(){
+    void getByIdOrderNotAuth() throws Exception{
+        BeerOrder beerOrder = stpeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
 
+        mockMvc.perform(get(API_ROOT+stpeteCustomer.getId()+"/orders/"+beerOrder.getId()))
+                .andExpect(status().isUnauthorized());
     }
 
-    @Disabled
+    @Transactional
+    @WithUserDetails("spring")
     @Test
-    void pickUpOrderNotAdminUser(){
+    void getByIdOrderAdmin() throws Exception{
+        BeerOrder beerOrder = stpeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
 
+        mockMvc.perform(get(API_ROOT+stpeteCustomer.getId()+"/orders/"+beerOrder.getId()))
+                .andExpect(status().is2xxSuccessful());
     }
 
-    @Disabled
+    @Transactional
+    @WithUserDetails(DefaultBreweryLoader.ST_PETE_USER)
     @Test
-    void pickUpOrderCustomerUserAuth(){
+    void getByIdOrderCustomerAuth() throws Exception{
+        BeerOrder beerOrder = stpeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
 
+        mockMvc.perform(get(API_ROOT+stpeteCustomer.getId()+"/orders/"+beerOrder.getId()))
+                .andExpect(status().is2xxSuccessful());
     }
 
-    @Disabled
+    @Transactional
+    @WithUserDetails(DefaultBreweryLoader.DUNEDIN_USER)
     @Test
-    void pickUpOrderCustomerUserNotAuth(){
+    void getByIdOrderCustomerNOTAuth() throws Exception{
+        BeerOrder beerOrder = stpeteCustomer.getBeerOrders().stream().findFirst().orElseThrow();
 
+        mockMvc.perform(get(API_ROOT+stpeteCustomer.getId()+"/orders/"+beerOrder.getId()))
+                .andExpect(status().isNotFound());
     }
 
     private BeerOrderDto buildOrderDTO(Customer customer, UUID beerId){

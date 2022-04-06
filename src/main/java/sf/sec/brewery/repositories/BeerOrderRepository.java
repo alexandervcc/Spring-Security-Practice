@@ -16,6 +16,7 @@
  */
 package sf.sec.brewery.repositories;
 
+import org.springframework.data.jpa.repository.Query;
 import sf.sec.brewery.domain.BeerOrder;
 import sf.sec.brewery.domain.Customer;
 import sf.sec.brewery.domain.OrderStatusEnum;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import sf.sec.brewery.web.model.BeerOrderDto;
 
 import javax.persistence.LockModeType;
 import java.util.List;
@@ -33,10 +35,16 @@ import java.util.UUID;
  */
 public interface BeerOrderRepository  extends JpaRepository<BeerOrder, UUID> {
 
+    @Query("select o from BeerOrder o where o.id = ?1 and "+
+            "(true = :#{hasAuthority('order.read')} or o.customer.id = ?#{principal?.customer?.id})")
+    BeerOrder findOrderByIdSecure(UUID orderId);
+
     Page<BeerOrder> findAllByCustomer(Customer customer, Pageable pageable);
 
     List<BeerOrder> findAllByOrderStatus(OrderStatusEnum orderStatusEnum);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     BeerOrder findOneById(UUID id);
+
+
 }

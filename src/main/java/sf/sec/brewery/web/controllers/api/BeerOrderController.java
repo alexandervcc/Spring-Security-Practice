@@ -1,5 +1,7 @@
 package sf.sec.brewery.web.controllers.api;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.server.ResponseStatusException;
 import sf.sec.brewery.services.BeerOrderService;
 import sf.sec.brewery.web.model.BeerOrderDto;
 import sf.sec.brewery.web.model.BeerOrderPagedList;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@Slf4j
 @RequestMapping("/api/v1/customers/{customerId}")
 @RestController
 public class BeerOrderController {
@@ -43,6 +46,11 @@ public class BeerOrderController {
         return beerOrderService.listOrders(customerId, PageRequest.of(pageNumber,pageSize));
     }
 
+    @PreAuthorize("" +
+            "hasAuthority('order.create') OR" +
+            " hasAuthority('customer.order.create') AND" +
+            " @beerOrderAuthenticationManager.customerIdMatches(authentication, #customerId )"
+    )
     @PostMapping("orders")
     @ResponseStatus(HttpStatus.CREATED)
     public BeerOrderDto placeOrder(
@@ -52,17 +60,30 @@ public class BeerOrderController {
         return beerOrderService.placeOrder(customerId,beerOrderDto);
     }
 
-    @PreAuthorize("" +
-            "hasAuthority('order.read') OR" +
-            " hasAuthority('customer.order.read') AND" +
-            " @beerOrderAuthenticationManager.customerIdMatches(authentication, #customerId )"
-    )
+//    @PreAuthorize("" +
+//            "hasAuthority('order.read') OR" +
+//            " hasAuthority('customer.order.read') AND" +
+//            " @beerOrderAuthenticationManager.customerIdMatches(authentication, #customerId )")
+//    @GetMapping("orders/{orderId}")
+//    public BeerOrderDto getOrder(
+//            @PathVariable("customerId")UUID customerId,
+//            @PathVariable("orderId")UUID orderId
+//    ){
+//        return beerOrderService.getOrderById(customerId,orderId);
+//    }
+
     @GetMapping("orders/{orderId}")
-    public BeerOrderDto getOrder(
+    public BeerOrderDto getOrderOnlyById(
             @PathVariable("customerId")UUID customerId,
             @PathVariable("orderId")UUID orderId
     ){
-        return beerOrderService.getOrderById(customerId,orderId);
+        BeerOrderDto beerOrderDto = beerOrderService.getOrderById(orderId);
+        if(beerOrderDto==null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Order not found");
+        }
+
+        log.debug("Found order: "+beerOrderDto);
+        return beerOrderDto;
     }
 
     @PutMapping("/orders/{orderId}/pickup")
