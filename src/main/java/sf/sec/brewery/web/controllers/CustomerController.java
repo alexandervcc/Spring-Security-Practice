@@ -30,10 +30,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import sf.sec.brewery.security.annotations.CustomerCreatePermission;
+import sf.sec.brewery.security.annotations.CustomerReadPermission;
 
 import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 @RequiredArgsConstructor
 @RequestMapping("/customers")
@@ -42,13 +47,14 @@ public class CustomerController {
 
     private final CustomerRepository customerRepository;
 
+    @CustomerReadPermission
     @RequestMapping("/find")
     public String findCustomers(Model model){
         model.addAttribute("customer", Customer.builder().build());
         return "customers/findCustomers";
     }
 
-    @Secured({"ROLE_ADMIN","ROLE_CUSTOMER"})
+    @CustomerReadPermission
     @GetMapping
     public String processFindFormReturnMany(Customer customer, BindingResult result, Model model){
         // find customers by name
@@ -68,7 +74,8 @@ public class CustomerController {
         }
     }
 
-   @GetMapping("/{customerId}")
+    @CustomerReadPermission
+    @GetMapping("/{customerId}")
     public ModelAndView showCustomer(@PathVariable UUID customerId) {
         ModelAndView mav = new ModelAndView("customers/customerDetails");
         //ToDO: Add Service
@@ -76,13 +83,15 @@ public class CustomerController {
         return mav;
     }
 
+    @CustomerReadPermission
     @GetMapping("/new")
     public String initCreationForm(Model model) {
         model.addAttribute("customer", Customer.builder().build());
         return "customers/createCustomer";
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
+    @CustomerCreatePermission
     @PostMapping("/new")
     public String processCreationForm(Customer customer) {
         Customer newCustomer = Customer.builder()

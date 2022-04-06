@@ -3,9 +3,16 @@ package sf.sec.brewery.web.controllers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.provider.Arguments;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import sf.sec.brewery.repositories.BeerInventoryRepository;
+import sf.sec.brewery.repositories.BeerRepository;
+import sf.sec.brewery.repositories.CustomerRepository;
+import sf.sec.brewery.services.BeerOrderService;
+import sf.sec.brewery.services.BeerService;
+import sf.sec.brewery.services.BreweryService;
 
 import java.util.stream.Stream;
 
@@ -20,23 +27,23 @@ public abstract class BaseIT {
 
     protected MockMvc mockMvc;
 
-//    @MockBean
-//    BeerRepository beerRepository;
-//
-//    @MockBean
-//    BeerInventoryRepository beerInventoryRepository;
-//
-//    @MockBean
-//    BreweryService breweryService;
-//
-//    @MockBean
-//    CustomerRepository customerRepository;
-//
-//    @MockBean
-//    BeerService beerService;
-//
-//    @MockBean
-//    BeerOrderService beerOrderService;
+    @MockBean
+    BeerRepository beerRepository;
+
+    @MockBean
+    BeerInventoryRepository beerInventoryRepository;
+
+    @MockBean
+    BreweryService breweryService;
+
+    @MockBean
+    CustomerRepository customerRepository;
+
+    @MockBean
+    BeerService beerService;
+
+    @MockBean
+    BeerOrderService beerOrderService;
 
 
     @BeforeEach

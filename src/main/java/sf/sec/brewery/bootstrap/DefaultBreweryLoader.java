@@ -213,6 +213,10 @@ public class DefaultBreweryLoader implements CommandLineRunner {
         Authority deleteOrder = authorityRepository.save(Authority.builder().permission("order.delete").build());
         Authority readOrder = authorityRepository.save(Authority.builder().permission("order.read").build());
 
+        //Customer Auhtorities
+        Authority readCustomer = authorityRepository.save(Authority.builder().permission("customer.read").build());
+        Authority createCustomer = authorityRepository.save(Authority.builder().permission("customer.create").build());
+
         //Orders Authorities - Customer
         Authority createOrderCustom =
                 authorityRepository.save(Authority.builder().permission("customer.order.create").build());
@@ -229,10 +233,14 @@ public class DefaultBreweryLoader implements CommandLineRunner {
         Role roleUser = roleRepository.save(Role.builder().name("USER").build());
 
         roleAdmin.setAuthorities(Set.of(
-                createBeer, readBeer, updateBeer, deleteBeer, createOrder, readOrder, deleteOrder, updateOrder
+                createBeer, readBeer, updateBeer, deleteBeer,
+                createOrder, readOrder, deleteOrder, updateOrder,
+                readCustomer, createCustomer
         ));
         roleCusto.setAuthorities(Set.of(
-                readBeer, readOrderCustom, createOrderCustom, deleteOrderCustom, updateOrderCustom
+                readBeer,
+                readOrderCustom, createOrderCustom, deleteOrderCustom, updateOrderCustom,
+                readCustomer
         ));
         roleUser.setAuthorities(Set.of(readBeer));
 
@@ -245,13 +253,13 @@ public class DefaultBreweryLoader implements CommandLineRunner {
                 .build());
 
         userRepository.save(User.builder()
-                .username("user")
+                .username("doggo")
                 .password(passwordEncoder.encode("mana"))
                 .role(roleCusto)
                 .build());
 
         userRepository.save(User.builder()
-                .username("doggo")
+                .username("user")
                 .password(passwordEncoder.encode("mana"))
                 .role(roleUser)
                 .build());
