@@ -1,6 +1,7 @@
 package sf.sec.brewery.config;
 
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import sf.sec.brewery.security.SfgPasswordEncoderFactories;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,22 +33,35 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests(authorize -> {
                     authorize
                             .antMatchers("/h2-console/**").permitAll() //do not use in production!
-                            .antMatchers("/", "/webjars/**", "/login", "/resources/**").permitAll()
+                            .antMatchers("/", "/webjars/**", "/login", "/resources/**").permitAll();
 //                            .antMatchers(HttpMethod.GET, "/api/v1/beer/**")
 //                                .hasAnyRole("ADMIN","CUSTOMER","USER")
 //                            .mvcMatchers(HttpMethod.GET, "/api/v1/beerUpc/{upc}")
 //                                .hasAnyRole("ADMIN","CUSTOMER")
-                            .mvcMatchers(HttpMethod.GET, "/brewery/api/v1/breweries")
-                            .hasAnyRole("ADMIN", "CUSTOMER")
-                            .mvcMatchers("/brewery/breweries")
-                            .hasAnyRole("ADMIN", "CUSTOMER")
-                            .mvcMatchers("/beers/find", "/beers*", "/beers/{beerId}")
-                            .hasAnyRole("ADMIN", "CUSTOMER", "USER");
+//                            .mvcMatchers(HttpMethod.GET, "/brewery/api/v1/breweries")
+//                            .hasAnyRole("ADMIN", "CUSTOMER")
+//                            .mvcMatchers("/brewery/breweries")
+//                            .hasAnyRole("ADMIN", "CUSTOMER")
+//                            .mvcMatchers("/beers/find", "/beers*", "/beers/{beerId}")
+//                            .hasAnyRole("ADMIN", "CUSTOMER", "USER");
                 })
                 .authorizeRequests()
                 .anyRequest().authenticated()
                 .and()
-                .formLogin().and()
+                .formLogin(loginConfigurer->{
+                    loginConfigurer
+                            .loginProcessingUrl("/login")
+                            .loginPage("/").permitAll()
+                            .successForwardUrl("/")
+                            .defaultSuccessUrl("/")
+                            .failureUrl("/?error");
+                })
+                .logout(logoutConfigurer->{
+                    logoutConfigurer
+                            .logoutRequestMatcher(new AntPathRequestMatcher("/logout","GET"))
+                            .logoutSuccessUrl("/?logout")
+                            .permitAll();
+                })
                 .httpBasic()
                 .and().csrf().ignoringAntMatchers("/h2-console/**","/api/**");
 
