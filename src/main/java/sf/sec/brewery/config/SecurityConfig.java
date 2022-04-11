@@ -1,6 +1,9 @@
 package sf.sec.brewery.config;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.data.repository.query.SecurityEvaluationContextExtension;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import sf.sec.brewery.security.SfgPasswordEncoderFactories;
 import org.springframework.context.annotation.Bean;
@@ -12,13 +15,14 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-/**
- * Created by jt on 6/13/20.
- */
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    private final UserDetailsService userDetailsService;
+    private final PersistentTokenRepository persistentTokenRepository;
 
     //Bean neeeded to use with SpringJAP SPeL
     @Bean
@@ -63,7 +67,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                             .permitAll();
                 })
                 .httpBasic()
-                .and().csrf().ignoringAntMatchers("/h2-console/**","/api/**");
+                .and().csrf().ignoringAntMatchers("/h2-console/**","/api/**")
+                .and().rememberMe()
+                    .tokenRepository(persistentTokenRepository)
+                    .userDetailsService(userDetailsService);
+//                .and().rememberMe()
+//                    .key("manaseses")
+//                    .userDetailsService(userDetailsService);
 
         //h2 console config
         http.headers().frameOptions().sameOrigin();
