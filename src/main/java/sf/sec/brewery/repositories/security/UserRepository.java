@@ -3,6 +3,8 @@ package sf.sec.brewery.repositories.security;
 import sf.sec.brewery.domain.security.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -10,4 +12,7 @@ import java.util.Optional;
  */
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByUsername(String username);
+
+    List<User> findAllByAccountNonExpiredAndLastModifiedDateIsBefore(Boolean locked, Timestamp timestamp);
 }
+
